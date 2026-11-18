@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Civic AI Classifier Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        #result {
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Civic AI Image Classifier</h1>
+    <p>Upload an image of a civic‑infrastructure issue (pothole, broken road, etc.) and see the model’s prediction.</p>
+
+    <input type="file" id="fileInput" accept="image/*"><br><br>
+    <button id="predictBtn">Classify Image</button>
+
+    <div id="result"></div>
+
+    <script>
+        const predictBtn = document.getElementById('predictBtn');
+        const fileInput = document.getElementById('fileInput');
+        const resultDiv = document.getElementById('result');
+
+        predictBtn.addEventListener('click', async () => {
+            if (!fileInput.files.length) {
+                alert('Please select an image file first.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                resultDiv.textContent = 'Classifying…';
+                const response = await fetch('http://127.0.0.1:8000/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error(`Server error ${response.status}`);
+
+                const data = await response.json();
+                resultDiv.textContent = `Prediction: ${data.label} (${data.confidence}% confidence)`;
+            } catch (err) {
+                console.error(err);
+                resultDiv.textContent = `Error: ${err.message}`;
+            }
+        });
+    </script>
+</body>
+
+</html>
